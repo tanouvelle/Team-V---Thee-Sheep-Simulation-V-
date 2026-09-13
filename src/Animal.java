@@ -15,7 +15,7 @@ public abstract class Animal extends Entity{
 
     private static String[] nameList = {"Mary", "Franky", "Franklin", "Georgie", "Susan", "Laura", "Daisy", "Rose","Cody","Cuddles", "Bill", "Shaun", "Katie", "Brutus", "Scar", "Fido", "Jet", };
 
-    public String name = "Background Character";
+    protected String name = "Background Character";
 
     protected double hunger = 0.5; //Range from 1.0 (Creature full), (0.0) Creature dies)
 
@@ -24,15 +24,15 @@ public abstract class Animal extends Entity{
         return hunger;
     }
 
-    public double speed = 1.0; //Tiles moved
+    protected double speed = 1.0; //Tiles moved
 
-    public double perception = 2.0; //Range of which creature can see
+    protected double perception = 2.0; //Range of which creature can see
 
-    public int age = 0; // Increase by 1 every generation
+    protected int age = 0; // Increase by 1 every generation
 
-    public int lifeSpan = 5;//Every generation after this, flip coin to see if survives
+    protected int lifeSpan = 5;//Every generation after this, flip coin to see if survives
 
-    public Color colour = Color.white;
+    protected Color colour = Color.white;
 
     protected static double hungerToReproduce = 0.75; //Will look for a mate if hunger above this level;
 
@@ -82,7 +82,7 @@ public abstract class Animal extends Entity{
     }
 
     //Moves animal towards destination, returns true if it is at the destination already with buffer.
-    public boolean Move(Position destination, int buffer)
+    private boolean Move(Position destination, int buffer)
     {
         Position direction = pos.dir(destination);
         if(Math.abs(direction.getX()) <= buffer && Math.abs(direction.getY()) <= buffer){return true;}
@@ -251,7 +251,7 @@ public abstract class Animal extends Entity{
             targetEntity = null;
             state = AnimalState.lookingForMate;
         }
-        if(Move(targetEntity.pos, 10))
+        if(Move(targetEntity.pos, 10  ))
         {
             System.out.println("reproducing");
             Reproduce((Animal)targetEntity);
