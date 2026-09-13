@@ -251,13 +251,17 @@ public abstract class Animal extends Entity{
             targetEntity = null;
             state = AnimalState.lookingForMate;
         }
-        if(Move(targetEntity.pos, 10  ))
-        {
-            System.out.println("reproducing");
-            Reproduce((Animal)targetEntity);
-            System.out.println("baby Created");
-            state = AnimalState.lookingForFood;
+        try{
+            if(Move(targetEntity.pos, 10))
+            {
+                System.out.println("reproducing");
+                Reproduce((Animal)targetEntity);
+                System.out.println("baby Created");
+                state = AnimalState.lookingForFood;
 
+            }
+        } catch(NullPointerException npe) {
+            System.out.println(this + "Target Entity not found");
         }
     }
 
