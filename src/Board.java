@@ -41,18 +41,23 @@ public class Board extends JPanel implements ActionListener {
         entities.add(new ArrayList<>());
         entities.add(new ArrayList<>());
         entities.get(Ent.sheep.get()).add(new Sheep("Mary", 1, 100, 5, new Animal[]{null, null}));
-        // entities.get(Ent.sheep.get()).add(new Sheep("Franky", 2, 70, 5, new Animal[]{null, null}));
-        // entities.get(Ent.sheep.get()).add(new Sheep("Bert", 1, 100, 5, new Animal[]{null, null}));
-        // entities.get(Ent.sheep.get()).add(new Sheep("Henry VII", 2, 70, 5, new Animal[]{null, null}));
-        // //entities.get(Ent.sheep.get()).add(new Sheep("Mary3", 1, 60, 5, new Animal[]{null, null}));
+        entities.get(Ent.sheep.get()).add(new Sheep("Franky", 2, 70, 5, new Animal[]{null, null}));
+        entities.get(Ent.sheep.get()).add(new Sheep("Bert", 1, 100, 5, new Animal[]{null, null}));
+        entities.get(Ent.sheep.get()).add(new Sheep("Henry VII", 2, 70, 5, new Animal[]{null, null}));
+        entities.get(Ent.sheep.get()).add(new Sheep("Mary3", 1, 60, 5, new Animal[]{null, null}));
 
-        // entities.get(Ent.wolf.get()).add(new Wolf("Fido", 1, 120, 5, new Animal[]{null, null}));
-        // entities.get(Ent.wolf.get()).add(new Wolf("Scar", 1, 120, 5, new Animal[]{null, null}));
+        entities.get(Ent.wolf.get()).add(new Wolf("Fido", 1, 120, 5, new Animal[]{null, null}));
+        entities.get(Ent.wolf.get()).add(new Wolf("Scar", 1, 120, 5, new Animal[]{null, null}));
         // for(int i =0; i < 20; i ++)
         // {
         //     entities.get(Ent.flower.get()).add(new Flower());
         // }
         //entities.get(Ent.flower.get()).add(new Flower());
+        entities.get(Ent.grass.get()).add(new Grass());
+        entities.get(Ent.grass.get()).add(new Grass());
+        entities.get(Ent.grass.get()).add(new Grass());
+        entities.get(Ent.grass.get()).add(new Grass());
+        entities.get(Ent.grass.get()).add(new Grass());
         entities.get(Ent.grass.get()).add(new Grass());
         for (List<Entity> list : entities) {
             for (Entity ent : list) {
@@ -72,7 +77,7 @@ public class Board extends JPanel implements ActionListener {
 
         tic = 1;
 
-        timer = new Timer(1, this);
+        timer = new Timer(10, this);
         timer.start();
     }
 
@@ -143,6 +148,14 @@ public class Board extends JPanel implements ActionListener {
         // }
         if (tic >= nextSpawn) {
             spreadGrass();
+            if (entities.get(Ent.grass.get()).size() <= 2) {
+                Grass newGrass = new Grass();
+                do {
+                    newGrass.pos = Position.genRand(bWidth, bHeight, 0, 100, 40);
+                } while (plantGrid[(newGrass.pos.getY() - 100) / 40][newGrass.pos.getX() / 40] != null);
+                entities.get(Ent.grass.get()).add(newGrass);
+                plantGrid[(newGrass.pos.getY() - 100) / 40][newGrass.pos.getX() / 40] = newGrass;
+            }
         }
         repaint();
         tic++;
@@ -150,11 +163,27 @@ public class Board extends JPanel implements ActionListener {
         CreateChildren();
         CleanUp(); 
     }
+    // private void printPlantGrid() {
+    //     for (Plant[] arr : plantGrid) {
+    //         for (Plant p : arr) {
+    //             if (p == null) {
+    //                 System.out.print("- ");
+    //             }
+    //             else if (p instanceof Grass) {
+    //                 System.out.print("g ");
+    //             }
+    //             else if (p instanceof Flower) {
+    //                 System.out.print("f ");
+    //             }
+    //         }
+    //         System.out.println();
+    //     }
+    // }
 
     private void spreadGrass() {
         List<Entity> newGrass = new ArrayList<>();
         List<Entity> newFlower = new ArrayList<>();
-        int max = 3;
+        int maxSpawn = Math.max(entities.get(Ent.sheep.get()).size(), 3);
         for (Entity en : entities.get(Ent.grass.get())) {
             Plant newG = ((Grass)en).spreadGrass();
             if (newG != null) {
@@ -164,9 +193,9 @@ public class Board extends JPanel implements ActionListener {
                 else {
                     newGrass.add(newG);
                 }
-                max--;
+                maxSpawn--;
             }
-            if (max <= 0) {
+            if (maxSpawn <= 0) {
                 break;
             }
         }
