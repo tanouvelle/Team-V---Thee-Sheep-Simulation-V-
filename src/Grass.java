@@ -15,13 +15,10 @@ public class Grass extends Plant{
         int randY = (int)(Math.random() * 3) - 1;
         int newX = 0;
         int newY = 0;
-        if (x + randX >= 0 && x + randX < Board.plantGrid[0].length) {
-            newX = x + randX;
-        }
 
-        if (y + randY >= 0 && y + randY < Board.plantGrid.length) {
-            newY = y + randY;
-        }
+        newX = (x + randX + Board.plantGrid[0].length) % Board.plantGrid[0].length;
+        newY = (y + randY + Board.plantGrid.length) % Board.plantGrid.length;
+        
         if (Board.plantGrid[newY][newX] != null) {
             return null;
         }
