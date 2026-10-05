@@ -12,6 +12,7 @@ public class Board extends JPanel implements ActionListener {
     private Timer timer;
     public static List<List<Entity>> entities;
     public static List<Animal> babyAnimals;
+    public static Plant[][] plantGrid;
 
     public Board(int bWidth, int bHeight) {
         Board.bWidth = bWidth;
@@ -43,15 +44,20 @@ public class Board extends JPanel implements ActionListener {
         entities.get(Ent.sheep.get()).add(new Sheep("Franky", 2, 70, 5, new Animal[]{null, null}));
         entities.get(Ent.sheep.get()).add(new Sheep("Bert", 1, 100, 5, new Animal[]{null, null}));
         entities.get(Ent.sheep.get()).add(new Sheep("Henry VII", 2, 70, 5, new Animal[]{null, null}));
-        //entities.get(Ent.sheep.get()).add(new Sheep("Mary3", 1, 60, 5, new Animal[]{null, null}));
+        entities.get(Ent.sheep.get()).add(new Sheep("Mary3", 1, 60, 5, new Animal[]{null, null}));
 
         entities.get(Ent.wolf.get()).add(new Wolf("Fido", 1, 120, 5, new Animal[]{null, null}));
         entities.get(Ent.wolf.get()).add(new Wolf("Scar", 1, 120, 5, new Animal[]{null, null}));
-        for(int i =0; i < 20; i ++)
-        {
-            entities.get(Ent.flower.get()).add(new Flower());
-        }
-        entities.get(Ent.flower.get()).add(new Flower());
+        // for(int i =0; i < 20; i ++)
+        // {
+        //     entities.get(Ent.flower.get()).add(new Flower());
+        // }
+        //entities.get(Ent.flower.get()).add(new Flower());
+        entities.get(Ent.grass.get()).add(new Grass());
+        entities.get(Ent.grass.get()).add(new Grass());
+        entities.get(Ent.grass.get()).add(new Grass());
+        entities.get(Ent.grass.get()).add(new Grass());
+        entities.get(Ent.grass.get()).add(new Grass());
         entities.get(Ent.grass.get()).add(new Grass());
         for (List<Entity> list : entities) {
             for (Entity ent : list) {
@@ -60,8 +66,17 @@ public class Board extends JPanel implements ActionListener {
             }
         }
 
-        tic = 1;
+        plantGrid = new Plant[12][16];
+        for(Entity e : entities.get(Ent.flower.get())) {
+            plantGrid[(e.pos.getY() - 100) / 40][e.pos.getX() / 40] = (Flower)e;
+        }
 
+        for(Entity e : entities.get(Ent.grass.get())) {
+            plantGrid[(e.pos.getY() - 100) / 40][e.pos.getX() / 40] = (Grass)e;
+        }
+
+        tic = 1;
+        nextSpawn = 300;
         timer = new Timer(10, this);
         timer.start();
     }
@@ -86,7 +101,7 @@ public class Board extends JPanel implements ActionListener {
                     animal.AnimalBehaviour();
                     if (tic % 100 == 0) {
 
-                        System.out.println(animal + " " + animal.name + " Hunger " + animal.GetHunger() + "State: " + animal.GetState().toString());
+                        //System.out.println(animal + " " + animal.name + " Hunger " + animal.GetHunger() + "State: " + animal.GetState().toString());
                     }
                 }
             }
@@ -121,17 +136,72 @@ public class Board extends JPanel implements ActionListener {
     @Override
     // After the timer finishes do this
     public void actionPerformed(ActionEvent e) {
+        // if (tic >= nextSpawn) {
+        //     Flower newFlower = new Flower();
+        //     do {
+        //         newFlower.pos = Position.genRand(bWidth, bHeight, 0, 100, 40);
+        //     } while (plantGrid[(newFlower.pos.getY() - 100) / 40][newFlower.pos.getX() / 40] != null);
+        //     entities.get(Ent.flower.get()).add(newFlower);
+        //     nextSpawn = tic + (int)(Math.random() * 300 + 200);
+        //     //((Grass)entities.get(Ent.grass.get()).get(0)).spreadGrass();
+            
+        // }
         if (tic >= nextSpawn) {
-            Flower newFlower = new Flower();
-            newFlower.pos = Position.genRand(bWidth, bHeight, 0, 100, 40);
-            entities.get(Ent.flower.get()).add(newFlower);
-            nextSpawn = tic + (int)(Math.random() * 300 + 200);
+            spreadGrass();
+            if (entities.get(Ent.grass.get()).size() <= 2) {
+                Grass newGrass = new Grass();
+                do {
+                    newGrass.pos = Position.genRand(bWidth, bHeight, 0, 100, 40);
+                } while (plantGrid[(newGrass.pos.getY() - 100) / 40][newGrass.pos.getX() / 40] != null);
+                entities.get(Ent.grass.get()).add(newGrass);
+                plantGrid[(newGrass.pos.getY() - 100) / 40][newGrass.pos.getX() / 40] = newGrass;
+            }
         }
         repaint();
         tic++;
 
         CreateChildren();
         CleanUp(); 
+    }
+    // private void printPlantGrid() {
+    //     for (Plant[] arr : plantGrid) {
+    //         for (Plant p : arr) {
+    //             if (p == null) {
+    //                 System.out.print("- ");
+    //             }
+    //             else if (p instanceof Grass) {
+    //                 System.out.print("g ");
+    //             }
+    //             else if (p instanceof Flower) {
+    //                 System.out.print("f ");
+    //             }
+    //         }
+    //         System.out.println();
+    //     }
+    // }
+
+    private void spreadGrass() {
+        List<Entity> newGrass = new ArrayList<>();
+        List<Entity> newFlower = new ArrayList<>();
+        int maxSpawn = Math.max(entities.get(Ent.sheep.get()).size(), 3);
+        for (Entity en : entities.get(Ent.grass.get())) {
+            Plant newG = ((Grass)en).spreadGrass();
+            if (newG != null) {
+                if (newG instanceof Flower) {
+                    newFlower.add(newG);
+                }
+                else {
+                    newGrass.add(newG);
+                }
+                maxSpawn--;
+            }
+            if (maxSpawn <= 0) {
+                break;
+            }
+        }
+        entities.get(Ent.grass.get()).addAll(newGrass);
+        entities.get(Ent.flower.get()).addAll(newFlower);
+        nextSpawn = tic + (int)(Math.random() * 300 + 200);
     }
 
     private void CreateChildren()
@@ -152,7 +222,10 @@ public class Board extends JPanel implements ActionListener {
             for(int i = subList.size() -1; i >= 0; i--)
             {
                 if(!subList.get(i).IsAlive())
-                {
+                {   
+                    if (subList.get(i) instanceof Plant) {
+                        plantGrid[(subList.get(i).pos.getY() - 100) / 40][subList.get(i).pos.getX() / 40] = null;
+                    }
                     subList.remove(i);
                 }
             }
