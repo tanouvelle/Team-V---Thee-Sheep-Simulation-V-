@@ -2,6 +2,7 @@ import java.awt.*;
 import java.awt.event.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import javax.swing.*;
 
@@ -60,10 +61,13 @@ public class Board extends JPanel implements ActionListener {
         entities.get(Ent.grass.get()).add(new Grass());
         entities.get(Ent.grass.get()).add(new Grass());
         for (List<Entity> list : entities) {
-            for (Entity ent : list) {
-                ent.pos = Position.genRand(bWidth, bHeight, 0, 100, 40);
-                System.out.println(ent);
-            }
+            // for (Entity ent : list) {
+            //     ent.pos = Position.genRand(bWidth, bHeight, 0, 100, 40);
+            //     System.out.println(ent);
+            // }
+            list.stream()
+                .map(ent -> ent.pos = Position.genRand(bWidth, bHeight, 0, 100, 40))
+                .collect(Collectors.toList());
         }
 
         plantGrid = new Plant[12][16];
@@ -123,12 +127,16 @@ public class Board extends JPanel implements ActionListener {
         g.setFont(medium);
         FontMetrics metrics = g.getFontMetrics();
         int yPos =  ((100 - metrics.getHeight()) / 2) + metrics.getAscent();
+
         int nextX = bWidth / 16;
         g.drawString("Sheep: " + entities.get(Ent.sheep.get()).size(), nextX, yPos);
+
         nextX += bWidth / 4;
         g.drawString("Wolves: " + entities.get(Ent.wolf.get()).size(), nextX, yPos);
+
         nextX += bWidth / 4;
         g.drawString("Flowers: " + entities.get(Ent.flower.get()).size(), nextX, yPos);
+
         nextX += bWidth / 4;
         g.drawString("Grass: " + entities.get(Ent.grass.get()).size(), nextX, yPos);
     }
@@ -206,10 +214,11 @@ public class Board extends JPanel implements ActionListener {
 
     private void CreateChildren()
     {
-        for(Animal baby : babyAnimals )
-        {
-            entities.get(baby.GetType().get()).add(baby);
-        }
+        // for(Animal baby : babyAnimals )
+        // {
+        //     entities.get(baby.GetType().get()).add(baby);
+        // }
+        babyAnimals.stream().forEach(baby -> entities.get(baby.GetType().get()).add(baby));
 
         babyAnimals.clear();
     }
