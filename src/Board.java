@@ -192,21 +192,35 @@ public class Board extends JPanel implements ActionListener {
         List<Entity> newGrass = new ArrayList<>();
         List<Entity> newFlower = new ArrayList<>();
         int maxSpawn = Math.max(entities.get(Ent.sheep.get()).size(), 3);
-        for (Entity en : entities.get(Ent.grass.get())) {
-            Plant newG = ((Grass)en).spreadGrass();
-            if (newG != null) {
-                if (newG instanceof Flower) {
-                    newFlower.add(newG);
-                }
-                else {
-                    newGrass.add(newG);
-                }
-                maxSpawn--;
-            }
-            if (maxSpawn <= 0) {
-                break;
-            }
-        }
+        // for (Entity en : entities.get(Ent.grass.get())) {
+        //     Plant newG = ((Grass)en).spreadGrass();
+        //     if (newG != null) {
+        //         if (newG instanceof Flower) {
+        //             newFlower.add(newG);
+        //         }
+        //         else {
+        //             newGrass.add(newG);
+        //         }
+        //         maxSpawn--;
+        //     }
+        //     if (maxSpawn <= 0) {
+        //         break;
+        //     }
+        // }
+        newGrass = entities.get(Ent.grass.get()).stream()
+                                                .map(en -> ((Grass)en).spreadGrass())
+                                                .filter(en -> en != null)
+                                                .limit(maxSpawn)
+                                                .collect(Collectors.toList());
+
+        newFlower = newGrass.stream()
+                            .filter(en -> en instanceof Flower)
+                            .collect(Collectors.toList());
+        
+        newGrass = newGrass.stream()
+                            .filter(en -> en instanceof Grass)
+                            .collect(Collectors.toList());
+        
         entities.get(Ent.grass.get()).addAll(newGrass);
         entities.get(Ent.flower.get()).addAll(newFlower);
         nextSpawn = tic + (int)(Math.random() * 300 + 200);
