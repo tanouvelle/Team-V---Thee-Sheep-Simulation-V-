@@ -175,9 +175,6 @@ public class Board extends JPanel implements ActionListener {
                 entities.get(Ent.grass.get()).add(newGrass);
                 plantGrid[(newGrass.pos.getY() - 100) / 40][newGrass.pos.getX() / 40] = newGrass;
             }
-            for (List<Entity> list : entities) {
-                System.out.println(list);
-            }
         }
         repaint();
         tic++;
