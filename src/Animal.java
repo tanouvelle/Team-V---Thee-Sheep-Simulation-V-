@@ -370,7 +370,7 @@ public abstract class Animal extends Entity{
             if (moved && (wait == 0 || hunger < 0.25))
             {   
                 wait = 100;
-                randPos = Position.genRand(Board.bWidth, Board.bHeight, 0, 100, 40);
+                randPos = Position.genRand(Board.bWidth, Board.bHeight, 20, 120, 40);
             }
             else if (moved) {
                 wait--;

@@ -49,7 +49,7 @@ public class Board extends JPanel implements ActionListener {
         spawnEntities();
         entities.stream()
                   .forEach(list -> list.stream()
-                                      .map(ent -> ent.pos = Position.genRand(bWidth, bHeight, 0, 100, 40))
+                                      .map(ent -> ent.pos = Position.genRand(bWidth, bHeight, 20, 120, 40))
                                       .collect(Collectors.toList())
                           );
 
@@ -80,16 +80,16 @@ public class Board extends JPanel implements ActionListener {
         //Spawn sheep
         int startAmount = (int)(Math.random() * 3 + 5);
         for (int i = 0; i < startAmount; i++) {
-            float speed = (int)(Math.random() * 2) + 1;
+            float speed = (int)(Math.random()) + 1;
             float perception = 10 * ((int)(Math.random() * 4) + 6);
             Sheep newSheep = new Sheep(null, speed, perception, 5, new Animal[]{null, null});
             entities.get(Ent.sheep.get()).add(newSheep);
         }
 
         //Spawn wolves
-        startAmount = (int)(Math.random() + 2);
+        startAmount = (int)(Math.random() * 3 + 3);
         for (int i = 0; i < startAmount; i++) {
-            float speed = 1;
+            float speed = (int)(Math.random() * 2) + 1;
             float perception = 10 * ((int)(Math.random() * 2) + 10);
             Wolf newWolf = new Wolf(null, speed, perception, 3, new Animal[]{null, null});
             entities.get(Ent.wolf.get()).add(newWolf);
@@ -178,7 +178,7 @@ public class Board extends JPanel implements ActionListener {
             if (entities.get(Ent.grass.get()).size() <= 2) {
                 Grass newGrass = new Grass();
                 do {
-                    newGrass.pos = Position.genRand(bWidth, bHeight, 0, 100, 40);
+                    newGrass.pos = Position.genRand(bWidth, bHeight, 20, 120, 40);
                 } while (plantGrid[(newGrass.pos.getY() - 100) / 40][newGrass.pos.getX() / 40] != null);
                 entities.get(Ent.grass.get()).add(newGrass);
                 plantGrid[(newGrass.pos.getY() - 100) / 40][newGrass.pos.getX() / 40] = newGrass;
