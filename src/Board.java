@@ -2,6 +2,7 @@ import java.awt.*;
 import java.awt.event.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import javax.swing.*;
 
@@ -46,12 +47,11 @@ public class Board extends JPanel implements ActionListener {
         entities.add(new ArrayList<>());
         entities.add(new ArrayList<>());
         spawnEntities();
-        for (List<Entity> list : entities) {
-            for (Entity ent : list) {
-                ent.pos = Position.genRand(bWidth, bHeight, 0, 100, 40);
-                System.out.println(ent);
-            }
-        }
+        entities.stream()
+                  .forEach(list -> list.stream()
+                                      .map(ent -> ent.pos = Position.genRand(bWidth, bHeight, 0, 100, 40))
+                                      .collect(Collectors.toList())
+                          );
 
         plantGrid = new Plant[12][16];
         for(Entity e : entities.get(Ent.flower.get())) {
@@ -119,17 +119,14 @@ public class Board extends JPanel implements ActionListener {
     }
 
     private void drawEntities(Graphics g) {
-        for (List<Entity> list : entities) {
-            for (Entity ent : list) {
-                ent.drawEntity(g);
-                if(ent instanceof Animal)
-                {
-                    Animal animal = (Animal)ent;
-                    animal.AnimalBehaviour();
-                    
-                }
-            }
-        }
+        entities.stream()
+                .forEach(list -> {
+                    list.stream()
+                        .peek(ent -> ent.drawEntity(g))
+                        .filter(ent -> ent instanceof Animal)
+                        .map(ent -> (Animal)ent)
+                        .forEach(animal -> animal.AnimalBehaviour());
+                });
     }
 
     private void drawGrid(Graphics g) {
@@ -147,12 +144,16 @@ public class Board extends JPanel implements ActionListener {
         g.setFont(medium);
         FontMetrics metrics = g.getFontMetrics();
         int yPos =  ((100 - metrics.getHeight()) / 2) + metrics.getAscent();
+
         int nextX = bWidth / 16;
         g.drawString("Sheep: " + entities.get(Ent.sheep.get()).size(), nextX, yPos);
+
         nextX += bWidth / 4;
         g.drawString("Wolves: " + entities.get(Ent.wolf.get()).size(), nextX, yPos);
+
         nextX += bWidth / 4;
         g.drawString("Flowers: " + entities.get(Ent.flower.get()).size(), nextX, yPos);
+
         nextX += bWidth / 4;
         g.drawString("Grass: " + entities.get(Ent.grass.get()).size(), nextX, yPos);
 
@@ -210,21 +211,20 @@ public class Board extends JPanel implements ActionListener {
         List<Entity> newGrass = new ArrayList<>();
         List<Entity> newFlower = new ArrayList<>();
         int maxSpawn = Math.max(entities.get(Ent.sheep.get()).size(), 3);
-        for (Entity en : entities.get(Ent.grass.get())) {
-            Plant newG = ((Grass)en).spreadGrass();
-            if (newG != null) {
-                if (newG instanceof Flower) {
-                    newFlower.add(newG);
-                }
-                else {
-                    newGrass.add(newG);
-                }
-                maxSpawn--;
-            }
-            if (maxSpawn <= 0) {
-                break;
-            }
-        }
+        newGrass = entities.get(Ent.grass.get()).stream()
+                                                .map(en -> ((Grass)en).spreadGrass())
+                                                .filter(en -> en != null)
+                                                .limit(maxSpawn)
+                                                .collect(Collectors.toList());
+
+        newFlower = newGrass.stream()
+                            .filter(en -> en instanceof Flower)
+                            .collect(Collectors.toList());
+        
+        newGrass = newGrass.stream()
+                            .filter(en -> en instanceof Grass)
+                            .collect(Collectors.toList());
+        
         entities.get(Ent.grass.get()).addAll(newGrass);
         entities.get(Ent.flower.get()).addAll(newFlower);
         nextSpawn = tic + (int)(Math.random() * 200 + 75);
@@ -232,10 +232,8 @@ public class Board extends JPanel implements ActionListener {
 
     private void CreateChildren()
     {
-        for(Animal baby : babyAnimals )
-        {
-            entities.get(baby.GetType().get()).add(baby);
-        }
+        babyAnimals.stream()
+                    .forEach(baby -> entities.get(baby.GetType().get()).add(baby));
 
         babyAnimals.clear();
     }
