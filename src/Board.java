@@ -60,12 +60,6 @@ public class Board extends JPanel implements ActionListener {
         entities.get(Ent.grass.get()).add(new Grass());
         entities.get(Ent.grass.get()).add(new Grass());
         entities.get(Ent.grass.get()).add(new Grass());
-        // for (List<Entity> list : entities) {
-        //     for (Entity ent : list) {
-        //         ent.pos = Position.genRand(bWidth, bHeight, 0, 100, 40);
-        //         System.out.println(ent);
-        //     }
-        // }
         entities.stream()
                 .forEach(list -> list.stream()
                                     .map(ent -> ent.pos = Position.genRand(bWidth, bHeight, 0, 100, 40))
@@ -98,21 +92,6 @@ public class Board extends JPanel implements ActionListener {
     }
 
     private void drawEntities(Graphics g) {
-        // for (List<Entity> list : entities) {
-        //     for (Entity ent : list) {
-        //         ent.drawEntity(g);
-        //         if(ent instanceof Animal)
-        //         {
-        //             Animal animal = (Animal)ent;
-        //             animal.AnimalBehaviour();
-        //             if (tic % 100 == 0) {
-
-        //                 //System.out.println(animal + " " + animal.name + " Hunger " + animal.GetHunger() + "State: " + animal.GetState().toString());
-        //             }
-        //         }
-        //     }
-    
-        // }
         entities.stream()
                 .forEach(list -> {
                     list.stream()
@@ -203,21 +182,6 @@ public class Board extends JPanel implements ActionListener {
         List<Entity> newGrass = new ArrayList<>();
         List<Entity> newFlower = new ArrayList<>();
         int maxSpawn = Math.max(entities.get(Ent.sheep.get()).size(), 3);
-        // for (Entity en : entities.get(Ent.grass.get())) {
-        //     Plant newG = ((Grass)en).spreadGrass();
-        //     if (newG != null) {
-        //         if (newG instanceof Flower) {
-        //             newFlower.add(newG);
-        //         }
-        //         else {
-        //             newGrass.add(newG);
-        //         }
-        //         maxSpawn--;
-        //     }
-        //     if (maxSpawn <= 0) {
-        //         break;
-        //     }
-        // }
         newGrass = entities.get(Ent.grass.get()).stream()
                                                 .map(en -> ((Grass)en).spreadGrass())
                                                 .filter(en -> en != null)
@@ -239,10 +203,6 @@ public class Board extends JPanel implements ActionListener {
 
     private void CreateChildren()
     {
-        // for(Animal baby : babyAnimals )
-        // {
-        //     entities.get(baby.GetType().get()).add(baby);
-        // }
         babyAnimals.stream()
                     .forEach(baby -> entities.get(baby.GetType().get()).add(baby));
 
