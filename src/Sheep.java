@@ -7,6 +7,8 @@ public class Sheep extends Animal{
         super(name, speed, perception, lifeSpan, parents);
         nutrition = 0.5;
         entityType = Board.Ent.sheep;
+
+        sprintOnFlee = true;
         
 
     }   
@@ -60,7 +62,7 @@ public class Sheep extends Animal{
     protected void Reproduce(Animal partAnimal)
     {
         super.Reproduce(partAnimal);
-       Board.babyAnimals.add(new Sheep(null, 1, 60, 5, new Animal[]{this, partAnimal}));
+       Board.babyAnimals.add(new Sheep(null, 1, 250, 5, new Animal[]{this, partAnimal}));
         
     }
 
