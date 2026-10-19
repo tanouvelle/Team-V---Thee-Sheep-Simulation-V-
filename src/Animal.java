@@ -35,6 +35,12 @@ public abstract class Animal extends Entity{
     {
         return stealth;
     }
+    
+    protected Genes gene;
+    public Genes GetGenes()
+    {
+        return gene;
+    }
     protected double sprintMultiplier = 2;
 
     protected int maxStamina = 400;
@@ -139,7 +145,7 @@ public abstract class Animal extends Entity{
     public void AnimalBehaviour()
     {
         if(!IsAlive()) return;
-        hunger -= 0.0001;
+        hunger -= gene.GetHungerRate();
         age += 1;
         if(state != AnimalState.fleeing && stamina < maxStamina)
         {
