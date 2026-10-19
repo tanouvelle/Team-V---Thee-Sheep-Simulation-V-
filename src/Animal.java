@@ -25,6 +25,13 @@ public abstract class Animal extends Entity{
         return hunger;
     }
 
+        protected Genes genes;
+    public Genes GetGenes()
+    {
+        return genes;
+    }
+
+    /*
     protected double speed = 1.0; //Tiles moved
 
     protected double perception = 2.0; //Range of which creature can see
@@ -36,19 +43,19 @@ public abstract class Animal extends Entity{
         return stealth;
     }
     
-    protected Genes gene;
-    public Genes GetGenes()
-    {
-        return gene;
-    }
+
     protected double sprintMultiplier = 2;
 
     protected int maxStamina = 400;
 
-    protected int stamina = 200;
+    
 
     protected int staminaUseRate = 2;
 
+
+
+    */
+   protected int stamina = 200;
     protected int age = 0; // Increase by 1 every generation
     public int GetAge()
     {
@@ -112,6 +119,11 @@ public abstract class Animal extends Entity{
         this.randPos = Position.genRand(Board.bWidth, Board.bHeight, 0, 100, 40);
     }
 
+
+    public Animal(Genes genes){
+        this.genes = genes;
+    }
+
     //Moves animal towards destination, returns true if it is at the destination already with buffer.
     private boolean Move(Position destination, int buffer, boolean sprint)
     {
@@ -119,12 +131,12 @@ public abstract class Animal extends Entity{
         Position direction = pos.dir(destination);
         if(Math.abs(direction.getX()) <= buffer && Math.abs(direction.getY()) <= buffer){return true;}
         
-        double moveSpeed = speed;
+        double moveSpeed = genes.GetSpeed();
         
         if(sprint && stamina > 0 && !exhausted)
         {
-            moveSpeed *= sprintMultiplier;
-            stamina -= staminaUseRate;
+            moveSpeed *= genes.GetSprintMultiplier();
+            stamina -= genes.GetStaminaUseRate();
             if(stamina < 0)
             {
                 exhausted = true;
@@ -145,19 +157,20 @@ public abstract class Animal extends Entity{
     public void AnimalBehaviour()
     {
         if(!IsAlive()) return;
-        hunger -= gene.GetHungerRate();
+        hunger -= genes.GetHungerRate();
+
         age += 1;
-        if(state != AnimalState.fleeing && stamina < maxStamina)
+        if(state != AnimalState.fleeing && stamina < genes.GetMaxStamina())
         {
-            stamina += 1;
-            hunger -= 0.00005;
+            stamina += genes.GetStaminaRecoverRate();
+            hunger -= 0.5 * genes.GetHungerRate();
         }
         
 
-        if(stamina > maxStamina)
+        if(stamina > genes.GetMaxStamina())
         {
             exhausted = false;
-            stamina = maxStamina;
+            stamina = genes.GetMaxStamina();
         }
         if(hunger < 0)
         {
@@ -165,7 +178,7 @@ public abstract class Animal extends Entity{
             hunger = 0;
             KillEntity();
             return;
-        }else if(age > lifeSpan)
+        }else if(age > genes.GetLifespan())
         {
             double roll = Math.random();
             if(roll < 0.01)
@@ -207,7 +220,7 @@ public abstract class Animal extends Entity{
     {
 
         double dist = this.pos.dist(chasingAnimal.pos) ;
-        if(dist > this.perception || !chasingAnimal.IsAlive())
+        if(dist > genes.GetPerception() || !chasingAnimal.IsAlive())
         {
             state = AnimalState.lookingForFood;
             return;
@@ -297,7 +310,7 @@ public abstract class Animal extends Entity{
         
         if(targetEntity == null || 
             !targetEntity.IsAlive() || 
-            pos.dist(targetEntity.pos) > perception)
+            pos.dist(targetEntity.pos) > genes.GetPerception())
         {
            targetEntity = null;
             state = AnimalState.lookingForFood;
@@ -345,7 +358,7 @@ public abstract class Animal extends Entity{
                 }
             }
             double dist = this.pos.dist(ent.pos) ;
-            if(dist < this.perception*100 && dist < closestDist)
+            if(dist < genes.GetPerception()*100 && dist < closestDist)
             {
                 closest = ent;
                 closestDist = dist;
@@ -415,7 +428,7 @@ public abstract class Animal extends Entity{
 
         double distance = pos.dist(hunter.pos);
 
-        double effectiveRange = perception - hunter.GetStealth();
+        double effectiveRange = genes.GetPerception() - hunter.GetGenes().GetStealth();
 
         double chance = 1.0 - (distance / effectiveRange);
         chance = Math.max(0, Math.min(1, chance));
@@ -453,9 +466,9 @@ public abstract class Animal extends Entity{
         hunger += entity.nutrition;
         stamina += entity.nutrition * 200;
         
-        if(hunger > 1.0)
+        if(hunger > genes.GetHungerCapacity())
         {
-            hunger = 1.0;
+            hunger = genes.GetHungerCapacity();
         }
         System.out.println("Creature "+ name + " ate entity worth "+ entity.nutrition + " nutrition. Total hunger now: " + hunger);
         entity.KillEntity();
@@ -476,7 +489,7 @@ public abstract class Animal extends Entity{
         g.fillRect(pos.getX()-20, pos.getY()-20, 40,40);
 
         if(!Board.debug) return;
-        g.drawOval(pos.getX() - (int)perception/2, pos.getY() - (int)perception/2, (int)perception, (int)perception);
+        g.drawOval(pos.getX() - (int)genes.GetPerception()/2, pos.getY() - (int)genes.GetPerception()/2/2, (int)genes.GetPerception(), (int)genes.GetPerception());
 
 
         int xOffset = pos.getX()- 20;
@@ -495,7 +508,7 @@ public abstract class Animal extends Entity{
         g.drawString(String.valueOf(age) + " / " +  String.valueOf(lifeSpan), xOffset, yOffset + 40);
 
         g.setColor(Color.YELLOW);
-        g.drawString(stamina + " / " +  maxStamina, xOffset, yOffset + 50);
+        g.drawString(stamina + " / " +  genes.GetMaxStamina(), xOffset, yOffset + 50);
 
         
         if(targetEntity != null && targetEntity.IsAlive())
