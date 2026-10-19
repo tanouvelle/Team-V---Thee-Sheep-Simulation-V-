@@ -9,12 +9,17 @@ import javax.swing.*;
 public class Board extends JPanel implements ActionListener {
     public static int bWidth; // Board width
     public static int bHeight; // Board height
-    private int tic; // Simulation tic
+    private static int tic; // Simulation tic
+    public static int GetTic()
+    {
+        return tic;
+    }
     private Timer timer;
     public static List<List<Entity>> entities;
     public static List<Animal> babyAnimals;
     public static Plant[][] plantGrid;
 
+    public static boolean debug;
     public Board(int bWidth, int bHeight) {
         Board.bWidth = bWidth;
         Board.bHeight = bHeight;
@@ -41,30 +46,12 @@ public class Board extends JPanel implements ActionListener {
         entities.add(new ArrayList<>());
         entities.add(new ArrayList<>());
         entities.add(new ArrayList<>());
-        entities.get(Ent.sheep.get()).add(new Sheep("Mary", 1, 100, 5, new Animal[]{null, null}));
-        entities.get(Ent.sheep.get()).add(new Sheep("Franky", 2, 70, 5, new Animal[]{null, null}));
-        entities.get(Ent.sheep.get()).add(new Sheep("Bert", 1, 100, 5, new Animal[]{null, null}));
-        entities.get(Ent.sheep.get()).add(new Sheep("Henry VII", 2, 70, 5, new Animal[]{null, null}));
-        entities.get(Ent.sheep.get()).add(new Sheep("Mary3", 1, 60, 5, new Animal[]{null, null}));
-
-        entities.get(Ent.wolf.get()).add(new Wolf("Fido", 1, 120, 5, new Animal[]{null, null}));
-        entities.get(Ent.wolf.get()).add(new Wolf("Scar", 1, 120, 5, new Animal[]{null, null}));
-        // for(int i =0; i < 20; i ++)
-        // {
-        //     entities.get(Ent.flower.get()).add(new Flower());
-        // }
-        //entities.get(Ent.flower.get()).add(new Flower());
-        entities.get(Ent.grass.get()).add(new Grass());
-        entities.get(Ent.grass.get()).add(new Grass());
-        entities.get(Ent.grass.get()).add(new Grass());
-        entities.get(Ent.grass.get()).add(new Grass());
-        entities.get(Ent.grass.get()).add(new Grass());
-        entities.get(Ent.grass.get()).add(new Grass());
+        spawnEntities();
         entities.stream()
-                .forEach(list -> list.stream()
-                                    .map(ent -> ent.pos = Position.genRand(bWidth, bHeight, 0, 100, 40))
-                                    .collect(Collectors.toList())
-                        );
+                  .forEach(list -> list.stream()
+                                      .map(ent -> ent.pos = Position.genRand(bWidth, bHeight, 0, 100, 40))
+                                      .collect(Collectors.toList())
+                          );
 
         plantGrid = new Plant[12][16];
         for(Entity e : entities.get(Ent.flower.get())) {
@@ -79,6 +66,46 @@ public class Board extends JPanel implements ActionListener {
         nextSpawn = 300;
         timer = new Timer(10, this);
         timer.start();
+    }
+
+    /*
+        Entity start amounts:
+
+        Sheep: 5-8
+        Wolves: 2-3
+        Grass: 8-12
+        Flowers: 0-2
+    */
+    private void spawnEntities() {
+        //Spawn sheep
+        int startAmount = (int)(Math.random() * 3 + 5);
+        for (int i = 0; i < startAmount; i++) {
+            float speed = (int)(Math.random() * 2) + 1;
+            float perception = 10 * ((int)(Math.random() * 4) + 6);
+            Sheep newSheep = new Sheep(null, speed, perception, 5, new Animal[]{null, null});
+            entities.get(Ent.sheep.get()).add(newSheep);
+        }
+
+        //Spawn wolves
+        startAmount = (int)(Math.random() + 2);
+        for (int i = 0; i < startAmount; i++) {
+            float speed = 1;
+            float perception = 10 * ((int)(Math.random() * 2) + 10);
+            Wolf newWolf = new Wolf(null, speed, perception, 3, new Animal[]{null, null});
+            entities.get(Ent.wolf.get()).add(newWolf);
+        }
+
+        //Spawn Grass
+        startAmount = (int)(Math.random() * 4 + 8);
+        for (int i = 0; i < startAmount; i++) {
+            entities.get(Ent.grass.get()).add(new Grass());
+        }
+
+        //Spawn Flower(s)
+        startAmount = (int)(Math.random() * 2);
+        for (int i = 0; i < startAmount; i++) {
+            entities.get(Ent.flower.get()).add(new Flower());
+        }
     }
 
     @Override
@@ -129,8 +156,10 @@ public class Board extends JPanel implements ActionListener {
 
         nextX += bWidth / 4;
         g.drawString("Grass: " + entities.get(Ent.grass.get()).size(), nextX, yPos);
+
+        g.drawString("Tic: " + tic, bWidth/2, 30);
     }
-    private int nextSpawn = 300;
+    private int nextSpawn = 50;
     @Override
     // After the timer finishes do this
     public void actionPerformed(ActionEvent e) {
@@ -198,7 +227,7 @@ public class Board extends JPanel implements ActionListener {
         
         entities.get(Ent.grass.get()).addAll(newGrass);
         entities.get(Ent.flower.get()).addAll(newFlower);
-        nextSpawn = tic + (int)(Math.random() * 300 + 200);
+        nextSpawn = tic + (int)(Math.random() * 200 + 75);
     }
 
     private void CreateChildren()
@@ -249,6 +278,11 @@ public class Board extends JPanel implements ActionListener {
                 entities.clear();
                 timer.stop();
                 resetSimulation();
+            }
+
+            if(keyCode == KeyEvent.VK_Q)
+            {
+                debug = !debug;
             }
         }
     }

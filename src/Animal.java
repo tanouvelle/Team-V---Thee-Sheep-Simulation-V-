@@ -10,12 +10,13 @@ public abstract class Animal extends Entity{
         lookingForFood, 
         chasingFood,
         lookingForMate,
-        chasingMate;
+        chasingMate,
+        fleeing;
     }
 
     private static String[] nameList = {"Mary", "Franky", "Franklin", "Georgie", "Susan", "Laura", "Daisy", "Rose","Cody","Cuddles", "Bill", "Shaun", "Katie", "Brutus", "Scar", "Fido", "Jet", };
 
-    public String name = "Background Character";
+    protected String name = "Background Character";
 
     protected double hunger = 0.5; //Range from 1.0 (Creature full), (0.0) Creature dies)
 
@@ -24,24 +25,45 @@ public abstract class Animal extends Entity{
         return hunger;
     }
 
-    public double speed = 1.0; //Tiles moved
+    protected double speed = 1.0; //Tiles moved
 
-    public double perception = 2.0; //Range of which creature can see
+    protected double perception = 2.0; //Range of which creature can see
 
-    public int age = 0; // Increase by 1 every generation
+    protected double stealth = 1.0;
 
-    public int lifeSpan = 5;//Every generation after this, flip coin to see if survives
+    public double GetStealth()
+    {
+        return stealth;
+    }
+    protected double sprintMultiplier = 2;
 
-    public Color colour = Color.white;
+    protected int maxStamina = 400;
+
+    protected int stamina = 200;
+
+    protected int staminaUseRate = 2;
+
+    protected int age = 0; // Increase by 1 every generation
+    public int GetAge()
+    {
+        return age;
+    }
+
+    protected int lifeSpan = 5;//Every generation after this, flip coin to see if survives
+
+    private boolean exhausted = false;//used all stamina, must refill to reuse.
+
+    protected Color colour = Color.white;
 
     protected static double hungerToReproduce = 0.75; //Will look for a mate if hunger above this level;
 
     private ArrayList<Animal> children = new ArrayList<Animal>();
     private Animal[] parents = new Animal[2];
 
-    private Entity targetEntity = null;
+    protected Entity targetEntity = null;
 
     public Position randPos;
+    private Position fleeTarget;
 
     protected AnimalState state = AnimalState.lookingForFood;
 
@@ -50,8 +72,11 @@ public abstract class Animal extends Entity{
     }
 
 
+    protected Animal chasingAnimal; //creature that is chasing THIS animal
     
-
+    //#region
+    protected boolean sprintOnChase = false;
+    protected boolean sprintOnFlee = false;
 
     public Animal()
     {
@@ -69,7 +94,7 @@ public abstract class Animal extends Entity{
         
         this.speed = speed;
         this.perception = perception;
-        this.lifeSpan = lifeSpan;
+        this.lifeSpan = lifeSpan * 400;
         this.parents = parents;
         this.pos = new Position(0, 0);
         this.hunger = 0.6;
@@ -82,15 +107,30 @@ public abstract class Animal extends Entity{
     }
 
     //Moves animal towards destination, returns true if it is at the destination already with buffer.
-    public boolean Move(Position destination, int buffer)
+    private boolean Move(Position destination, int buffer, boolean sprint)
     {
+        
         Position direction = pos.dir(destination);
         if(Math.abs(direction.getX()) <= buffer && Math.abs(direction.getY()) <= buffer){return true;}
+        
+        double moveSpeed = speed;
+        
+        if(sprint && stamina > 0 && !exhausted)
+        {
+            moveSpeed *= sprintMultiplier;
+            stamina -= staminaUseRate;
+            if(stamina < 0)
+            {
+                exhausted = true;
+                stamina = 0;
+            }
+        }
+        
         if(Math.abs(direction.getX()) > Math.abs(direction.getY()))
         {
-            pos.setX((int)(pos.getX() + speed * Math.signum(direction.getX())));
+            pos.setX((int)(pos.getX() + moveSpeed * Math.signum(direction.getX())));
         }else{
-            pos.setY((int)(pos.getY() + speed * Math.signum(direction.getY())));
+            pos.setY((int)(pos.getY() + moveSpeed * Math.signum(direction.getY())));
         }
         return false;
     }
@@ -100,12 +140,34 @@ public abstract class Animal extends Entity{
     {
         if(!IsAlive()) return;
         hunger -= 0.0001;
+        age += 1;
+        if(state != AnimalState.fleeing && stamina < maxStamina)
+        {
+            stamina += 1;
+            hunger -= 0.00005;
+        }
+        
+
+        if(stamina > maxStamina)
+        {
+            exhausted = false;
+            stamina = maxStamina;
+        }
         if(hunger < 0)
         {
             System.out.println(name + " Starved");
             hunger = 0;
             KillEntity();
             return;
+        }else if(age > lifeSpan)
+        {
+            double roll = Math.random();
+            if(roll < 0.01)
+            {
+                System.out.println(name + " Died of old age" + age);
+                KillEntity();
+            }
+            
         }
         
         switch(state){
@@ -126,11 +188,83 @@ public abstract class Animal extends Entity{
             {
                 ChasingMate();
                 break;
+            }case AnimalState.fleeing:
+            {
+                Flee();
+                break;
             }
 
         }     
     }
 
+    protected void Flee()
+    {
+
+        double dist = this.pos.dist(chasingAnimal.pos) ;
+        if(dist > this.perception || !chasingAnimal.IsAlive())
+        {
+            state = AnimalState.lookingForFood;
+            return;
+        }
+        if(fleeTarget == null)
+        {
+            fleeTarget = GetFleeTarget(chasingAnimal);
+        }
+         //temp magic
+        if(Move(fleeTarget, 10, sprintOnFlee))
+        {
+            fleeTarget = GetFleeTarget(chasingAnimal);
+        }
+
+      
+        
+    }
+
+    private Position GetFleeTarget(Animal hunter)
+    {
+        if(hunter == null){
+            System.out.print("Animal " + name + " is fleeing but has no chase target?");
+            return new Position(Board.bWidth/2, Board.bHeight/2 + 100);
+        }
+        int newWidth;
+        int newBufferX = 0;
+        int newHeight;
+        int newBufferY = 100;
+        if(pos.getX() > hunter.pos.getX())
+        {
+            newWidth = Board.bWidth - hunter.pos.getX();
+            newBufferX += hunter.pos.getX();
+      
+            
+           
+        }else{
+            newWidth = hunter.pos.getX();
+            
+
+        }
+
+        if(pos.getY() > hunter.pos.getY())
+        {
+            newHeight = Board.bHeight - hunter.pos.getY();
+            newBufferY += hunter.pos.getY();
+            
+
+        }else{
+            newHeight = hunter.pos.getY();
+        }
+
+        newHeight = Math.clamp(newHeight, 0, Board.bHeight);
+        newBufferY = Math.clamp(newBufferY, 100, Board.bHeight);
+        newWidth = Math.clamp(newWidth, 0, Board.bWidth);
+        newBufferX = Math.clamp(newBufferX, 0, Board.bWidth);
+
+        System.out.println(newHeight + " / " + newBufferY);
+        int end = newBufferY + newHeight;
+        System.out.println(name + " Flee target bounds within " + newBufferY + " - " + end);
+        Position targetLocation = Position.genRand(newWidth, newHeight, newBufferX, newBufferY, 40);
+        System.out.println("Location " + targetLocation.toString());
+        return targetLocation;
+    }
     protected void LookingForFood()
     {
         if(targetEntity == null || !targetEntity.IsAlive())
@@ -154,14 +288,18 @@ public abstract class Animal extends Entity{
 
     protected void ChasingFood()
     {
-        //NEED TO FIX THIS AS, WHILST TECHINICALLY IT SHOULD NOT CRASH, SHEEP WILL HUNT INVISIBLE FLOWERS
-        if(targetEntity == null || !targetEntity.IsAlive())
+        
+        if(targetEntity == null || 
+            !targetEntity.IsAlive() || 
+            pos.dist(targetEntity.pos) > perception)
         {
            targetEntity = null;
             state = AnimalState.lookingForFood;
             return;
         }
-        if(Move(targetEntity.pos, 10))
+
+   
+        if(Move(targetEntity.pos, 10, sprintOnChase))
         {
             EatFood(targetEntity);
             if(hunger >= hungerToReproduce)
@@ -228,7 +366,7 @@ public abstract class Animal extends Entity{
 
     protected void RoamRandomly()
     {
-        boolean moved = Move(randPos, 10);
+        boolean moved = Move(randPos, 10, false);
             if (moved && (wait == 0 || hunger < 0.25))
             {   
                 wait = 100;
@@ -252,7 +390,7 @@ public abstract class Animal extends Entity{
             state = AnimalState.lookingForMate;
         }
         try{
-            if(Move(targetEntity.pos, 10))
+            if(Move(targetEntity.pos, 10, false))
             {
                 System.out.println("reproducing");
                 Reproduce((Animal)targetEntity);
@@ -265,7 +403,23 @@ public abstract class Animal extends Entity{
         }
     }
 
-    
+    public void AlertAnimal(Animal hunter)
+    {
+        if(state == AnimalState.fleeing) return;
+
+        double distance = pos.dist(hunter.pos);
+
+        double effectiveRange = perception - hunter.GetStealth();
+
+        double chance = 1.0 - (distance / effectiveRange);
+        chance = Math.max(0, Math.min(1, chance));
+
+        if(Math.random() < chance)
+        {
+            state = AnimalState.fleeing;
+            chasingAnimal = hunter;
+        }
+    }
     protected void Reproduce(Animal anim)
     {
         targetEntity = null;
@@ -273,6 +427,8 @@ public abstract class Animal extends Entity{
         hunger = hunger - 0.4f;
         anim.hunger = anim.hunger - 0.4f;
         anim.targetEntity = null;
+
+
 
         //temp
         
@@ -289,6 +445,7 @@ public abstract class Animal extends Entity{
     {
        
         hunger += entity.nutrition;
+        stamina += entity.nutrition * 200;
         
         if(hunger > 1.0)
         {
@@ -310,19 +467,39 @@ public abstract class Animal extends Entity{
     @Override
     public void drawEntity(Graphics g) {
         g.setColor(colour);
-        g.fillRect(pos.getX(), pos.getY(), 40,40);
+        g.fillRect(pos.getX()-20, pos.getY()-20, 40,40);
 
-        
+        if(!Board.debug) return;
+        g.drawOval(pos.getX() - (int)perception/2, pos.getY() - (int)perception/2, (int)perception, (int)perception);
 
 
+        int xOffset = pos.getX()- 20;
+        int yOffset = pos.getY() - 20;
         g.setColor(Color.RED);
-        g.drawString(name.toString(), pos.getX() + 5, pos.getY() + 5);
+        g.drawString(name.toString(), xOffset, yOffset + 2);
         g.setColor(Color.green);
         double rounded = Math.round(hunger * 100.0) / 100.0;
 
-        g.drawString(Double.toString(rounded), pos.getX() + 5, pos.getY() + 20);
+        g.drawString(Double.toString(rounded), xOffset ,  yOffset + 15);
 
         g.setColor(Color.BLUE);
-        g.drawString(state.toString(), pos.getX() + 5, pos.getY() + 35);
+        g.drawString(state.toString(), xOffset, yOffset + 30);
+
+        g.setColor(Color.PINK);
+        g.drawString(String.valueOf(age) + " / " +  String.valueOf(lifeSpan), xOffset, yOffset + 40);
+
+        g.setColor(Color.YELLOW);
+        g.drawString(stamina + " / " +  maxStamina, xOffset, yOffset + 50);
+
+        
+        if(targetEntity != null && targetEntity.IsAlive())
+        {
+            g.setColor(Color.RED);
+            g.drawLine(pos.getX(), pos.getY(), targetEntity.pos.getX(), targetEntity.pos.getY());
+        }
+        
+        
+
+        
     }
 }

@@ -11,6 +11,12 @@ public class Wolf extends Animal {
         super(name, speed, perception, lifeSpan, parents);
         this.colour = Color.gray;
         entityType = Board.Ent.wolf;
+        stealth = 20;
+
+        sprintOnChase = true;
+        maxStamina = 200;
+        staminaUseRate = 10;
+        stamina = 100;
 
     }  
 
@@ -40,6 +46,25 @@ public class Wolf extends Animal {
         return closest;
     }
 
+    @Override 
+    protected void ChasingFood()
+    {
+        
+
+        Animal targ = (Animal)targetEntity;
+        if(targ == null)
+        {
+            System.out.println("ERROR, targ was null for creature " + name);
+            return;
+        }
+        if(targ.GetState() != AnimalState.fleeing)
+        {
+            targ.AlertAnimal(this);
+        }
+
+        super.ChasingFood();
+    }
+
     
     public void EatSheep(Entity entity) {
         if (entity instanceof Sheep) {
@@ -51,7 +76,7 @@ public class Wolf extends Animal {
     protected void Reproduce(Animal partAnimal)
     {
         super.Reproduce(partAnimal);
-       Board.babyAnimals.add(new Wolf(null, 1, 60, 5, new Animal[]{this, partAnimal}));
+       Board.babyAnimals.add(new Wolf(null, 1, 300, 5, new Animal[]{this, partAnimal}));
         
     }
 /*
