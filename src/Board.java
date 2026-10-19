@@ -60,15 +60,17 @@ public class Board extends JPanel implements ActionListener {
         entities.get(Ent.grass.get()).add(new Grass());
         entities.get(Ent.grass.get()).add(new Grass());
         entities.get(Ent.grass.get()).add(new Grass());
-        for (List<Entity> list : entities) {
-            // for (Entity ent : list) {
-            //     ent.pos = Position.genRand(bWidth, bHeight, 0, 100, 40);
-            //     System.out.println(ent);
-            // }
-            list.stream()
-                .map(ent -> ent.pos = Position.genRand(bWidth, bHeight, 0, 100, 40))
-                .collect(Collectors.toList());
-        }
+        // for (List<Entity> list : entities) {
+        //     for (Entity ent : list) {
+        //         ent.pos = Position.genRand(bWidth, bHeight, 0, 100, 40);
+        //         System.out.println(ent);
+        //     }
+        // }
+        entities.stream()
+                .forEach(list -> list.stream()
+                                    .map(ent -> ent.pos = Position.genRand(bWidth, bHeight, 0, 100, 40))
+                                    .collect(Collectors.toList())
+                        );
 
         plantGrid = new Plant[12][16];
         for(Entity e : entities.get(Ent.flower.get())) {
@@ -96,20 +98,29 @@ public class Board extends JPanel implements ActionListener {
     }
 
     private void drawEntities(Graphics g) {
-        for (List<Entity> list : entities) {
-            for (Entity ent : list) {
-                ent.drawEntity(g);
-                if(ent instanceof Animal)
-                {
-                    Animal animal = (Animal)ent;
-                    animal.AnimalBehaviour();
-                    if (tic % 100 == 0) {
+        // for (List<Entity> list : entities) {
+        //     for (Entity ent : list) {
+        //         ent.drawEntity(g);
+        //         if(ent instanceof Animal)
+        //         {
+        //             Animal animal = (Animal)ent;
+        //             animal.AnimalBehaviour();
+        //             if (tic % 100 == 0) {
 
-                        //System.out.println(animal + " " + animal.name + " Hunger " + animal.GetHunger() + "State: " + animal.GetState().toString());
-                    }
-                }
-            }
-        }
+        //                 //System.out.println(animal + " " + animal.name + " Hunger " + animal.GetHunger() + "State: " + animal.GetState().toString());
+        //             }
+        //         }
+        //     }
+    
+        // }
+        entities.stream()
+                .forEach(list -> {
+                    list.stream()
+                        .peek(ent -> ent.drawEntity(g))
+                        .filter(ent -> ent instanceof Animal)
+                        .map(ent -> (Animal)ent)
+                        .forEach(animal -> animal.AnimalBehaviour());
+                });
     }
 
     private void drawGrid(Graphics g) {
@@ -163,6 +174,9 @@ public class Board extends JPanel implements ActionListener {
                 } while (plantGrid[(newGrass.pos.getY() - 100) / 40][newGrass.pos.getX() / 40] != null);
                 entities.get(Ent.grass.get()).add(newGrass);
                 plantGrid[(newGrass.pos.getY() - 100) / 40][newGrass.pos.getX() / 40] = newGrass;
+            }
+            for (List<Entity> list : entities) {
+                System.out.println(list);
             }
         }
         repaint();
@@ -232,7 +246,8 @@ public class Board extends JPanel implements ActionListener {
         // {
         //     entities.get(baby.GetType().get()).add(baby);
         // }
-        babyAnimals.stream().forEach(baby -> entities.get(baby.GetType().get()).add(baby));
+        babyAnimals.stream()
+                    .forEach(baby -> entities.get(baby.GetType().get()).add(baby));
 
         babyAnimals.clear();
     }
