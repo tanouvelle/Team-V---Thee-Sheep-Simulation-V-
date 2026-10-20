@@ -11,7 +11,8 @@ public abstract class Animal extends Entity{
         chasingFood,
         lookingForMate,
         chasingMate,
-        fleeing;
+        fleeing,
+        resting;
     }
 
     private static String[] nameList = {"Mary", "Franky", "Franklin", "Georgie", "Susan", "Laura", "Daisy", "Rose","Cody","Cuddles", "Bill", "Shaun", "Katie", "Brutus", "Scar", "Fido", "Jet", };
@@ -62,7 +63,7 @@ public abstract class Animal extends Entity{
         return age;
     }
 
-    protected int lifeSpan = 5;//Every generation after this, flip coin to see if survives
+    //protected int lifeSpan = 5;//Every generation after this, flip coin to see if survives
 
     private boolean exhausted = false;//used all stamina, must refill to reuse.
 
@@ -90,12 +91,33 @@ public abstract class Animal extends Entity{
     //#region
     protected boolean sprintOnChase = false;
     protected boolean sprintOnFlee = false;
+    protected boolean giveUpChaseOnExhausted = false;
 
     public Animal()
     {
         
     }
 
+    public Animal(Genes genes, Animal[] parents)
+    {
+
+        this.name = nameList[(int)(Math.random() * nameList.length)];
+        this.genes = genes;
+        this.parents = parents;
+
+        this.pos = new Position(0, 0);
+
+        this.stamina = (int)(0.6 * genes.GetMaxStamina());
+        if(parents[0] != null)
+        {
+            this.pos.setX(parents[0].pos.getX());
+            this.pos.setY(parents[0].pos.getY());
+        }
+            
+        this.randPos = Position.genRand(Board.bWidth, Board.bHeight, 0, 100, 40);
+    }
+
+    /*
     public Animal(String name, double speed, double perception, int lifeSpan, Animal[] parents)
     {
         if(name != null)
@@ -119,7 +141,7 @@ public abstract class Animal extends Entity{
         this.randPos = Position.genRand(Board.bWidth, Board.bHeight, 0, 100, 40);
     }
 
-
+    */
     public Animal(Genes genes){
         this.genes = genes;
     }
@@ -163,11 +185,11 @@ public abstract class Animal extends Entity{
         if(state != AnimalState.fleeing && stamina < genes.GetMaxStamina())
         {
             stamina += genes.GetStaminaRecoverRate();
-            hunger -= 0.5 * genes.GetHungerRate();
+            //hunger -= 0.5 * genes.GetHungerRate();
         }
         
 
-        if(stamina > genes.GetMaxStamina())
+        if(stamina >= genes.GetMaxStamina())
         {
             exhausted = false;
             stamina = genes.GetMaxStamina();
@@ -181,7 +203,7 @@ public abstract class Animal extends Entity{
         }else if(age > genes.GetLifespan())
         {
             double roll = Math.random();
-            if(roll < 0.01)
+            if(roll < 0.001)
             {
                 System.out.println(name + " Died of old age" + age);
                 KillEntity();
@@ -211,11 +233,23 @@ public abstract class Animal extends Entity{
             {
                 Flee();
                 break;
+            }case AnimalState.resting:
+            {
+                Rest();
+                break;
             }
 
         }     
     }
 
+    protected void Rest()
+    {
+        if(!exhausted){
+            state = AnimalState.lookingForFood;
+        }
+        stamina +=  genes.GetStaminaRecoverRate();
+        hunger += 0.5 * genes.GetHungerRate();
+    }
     protected void Flee()
     {
 
@@ -418,7 +452,7 @@ public abstract class Animal extends Entity{
 
             }
         } catch(NullPointerException npe) {
-            System.out.println(this + "Target Entity not found");
+            System.out.println(this + "Target Entity not found" + npe);
         }
     }
 
@@ -443,9 +477,12 @@ public abstract class Animal extends Entity{
     {
         targetEntity = null;
         
-        hunger = hunger - 0.4f;
-        anim.hunger = anim.hunger - 0.4f;
+        //hunger = hunger - 0.4f;
+        //anim.hunger = anim.hunger - 0.4f;
         anim.targetEntity = null;
+        stamina = 0;
+        exhausted = true;
+        state = AnimalState.resting;
 
 
 
@@ -478,10 +515,7 @@ public abstract class Animal extends Entity{
 
 
     
-    public void Reproduce() 
-    {
-        
-    }
+
 
     @Override
     public void drawEntity(Graphics g) {
@@ -489,7 +523,7 @@ public abstract class Animal extends Entity{
         g.fillRect(pos.getX()-20, pos.getY()-20, 40,40);
 
         if(!Board.debug) return;
-        g.drawOval(pos.getX() - (int)genes.GetPerception()/2, pos.getY() - (int)genes.GetPerception()/2/2, (int)genes.GetPerception(), (int)genes.GetPerception());
+        g.drawOval(pos.getX() - (int)genes.GetPerception()/2, pos.getY() - (int)genes.GetPerception()/2, (int)genes.GetPerception(), (int)genes.GetPerception());
 
 
         int xOffset = pos.getX()- 20;
@@ -505,9 +539,15 @@ public abstract class Animal extends Entity{
         g.drawString(state.toString(), xOffset, yOffset + 30);
 
         g.setColor(Color.PINK);
-        g.drawString(String.valueOf(age) + " / " +  String.valueOf(lifeSpan), xOffset, yOffset + 40);
+        g.drawString(String.valueOf(age) + " / " +  String.valueOf(genes.GetLifespan()), xOffset, yOffset + 40);
 
-        g.setColor(Color.YELLOW);
+        if(exhausted)
+        {
+            g.setColor(Color.ORANGE);
+        }else{
+            g.setColor(Color.YELLOW);
+        }
+        
         g.drawString(stamina + " / " +  genes.GetMaxStamina(), xOffset, yOffset + 50);
 
         

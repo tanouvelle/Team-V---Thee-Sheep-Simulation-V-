@@ -78,25 +78,58 @@ public class Board extends JPanel implements ActionListener {
     */
     private void spawnEntities() {
         //Spawn sheep
-        int startAmount = (int)(Math.random() * 3 + 5);
+        int startAmount = (int)(Math.random() * 5 + 7);
+        
         for (int i = 0; i < startAmount; i++) {
+
+            Genes genes = new Genes(
+                20 * (int)(Math.random()  + 8),
+                (int)(Math.random()) + 1,
+                
+                2000,
+                4000,
+                2,
+                10,
+                1,
+                1.5,
+                20
+                
+
+            );
+            /*
             float speed = (int)(Math.random()) + 1;
             float perception = 10 * ((int)(Math.random() * 4) + 6);
-            Sheep newSheep = new Sheep(null, speed, perception, 5, new Animal[]{null, null});
+            */
+            Sheep newSheep = new Sheep(genes, new Animal[]{null, null});
             entities.get(Ent.sheep.get()).add(newSheep);
         }
 
         //Spawn wolves
-        startAmount = (int)(Math.random() * 3 + 3);
+        startAmount = (int)(Math.random() * 2 + 2);
         for (int i = 0; i < startAmount; i++) {
+            Genes genes = new Genes(
+                
+                15 * ((int)(Math.random()) + 6),
+                (int)(Math.random() * 2) + 1,
+                3000,
+                1000,
+                3,
+                40,
+                1
+                ,1.5,
+                20
+                
+
+            );
+
             float speed = (int)(Math.random() * 2) + 1;
             float perception = 10 * ((int)(Math.random() * 2) + 10);
-            Wolf newWolf = new Wolf(null, speed, perception, 3, new Animal[]{null, null});
+            Wolf newWolf = new Wolf(genes, new Animal[]{null, null});
             entities.get(Ent.wolf.get()).add(newWolf);
         }
 
         //Spawn Grass
-        startAmount = (int)(Math.random() * 4 + 8);
+        startAmount = (int)(Math.random() * 6 + 12);
         for (int i = 0; i < startAmount; i++) {
             entities.get(Ent.grass.get()).add(new Grass());
         }
@@ -232,6 +265,7 @@ public class Board extends JPanel implements ActionListener {
 
     private void CreateChildren()
     {
+        
         babyAnimals.stream()
                     .forEach(baby -> entities.get(baby.GetType().get()).add(baby));
 

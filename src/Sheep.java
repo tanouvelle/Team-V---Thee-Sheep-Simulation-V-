@@ -2,6 +2,14 @@ import java.util.List;
 public class Sheep extends Animal{
 
     
+    public Sheep(Genes genes, Animal[] parents)
+    {
+        super(genes, parents);
+        entityType = Board.Ent.sheep;
+
+        sprintOnFlee = true;
+    }
+    /*
     public Sheep(String name, float speed, float perception, int lifeSpan, Animal[] parents)
     {
         super(name, speed, perception, lifeSpan, parents);
@@ -12,6 +20,7 @@ public class Sheep extends Animal{
         
 
     }   
+    */
 
     @Override
     public Entity LookForFood()
@@ -26,7 +35,7 @@ public class Sheep extends Animal{
         for (Entity flower : allPlants) {
 
             double dist = this.pos.dist(flower.pos) ;
-            if(dist < this.perception && dist < closestDist)
+            if(dist < genes.GetPerception() && dist < closestDist)
             {
                 closest = flower;
                 closestDist = dist;
@@ -45,7 +54,7 @@ public class Sheep extends Animal{
         for (Entity grass : allPlants) {
 
             double dist = this.pos.dist(grass.pos) ;
-            if(dist < this.perception && dist < closestDist)
+            if(dist < genes.GetPerception() && dist < closestDist)
             {
                 closest = grass;
                 closestDist = dist;
@@ -61,8 +70,15 @@ public class Sheep extends Animal{
     @Override 
     protected void Reproduce(Animal partAnimal)
     {
+
+        System.out.println("Making baby sheep");
+        
+        Genes babyGenes = new Genes(genes, partAnimal.GetGenes());
+        Sheep newSheep = new Sheep(babyGenes, new Animal[]{this, partAnimal});
+        Board.babyAnimals.add( newSheep);
+
+
         super.Reproduce(partAnimal);
-       Board.babyAnimals.add(new Sheep(null, 1, 250, 5, new Animal[]{this, partAnimal}));
         
     }
 
