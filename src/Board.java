@@ -196,16 +196,6 @@ public class Board extends JPanel implements ActionListener {
     @Override
     // After the timer finishes do this
     public void actionPerformed(ActionEvent e) {
-        // if (tic >= nextSpawn) {
-        //     Flower newFlower = new Flower();
-        //     do {
-        //         newFlower.pos = Position.genRand(bWidth, bHeight, 0, 100, 40);
-        //     } while (plantGrid[(newFlower.pos.getY() - 100) / 40][newFlower.pos.getX() / 40] != null);
-        //     entities.get(Ent.flower.get()).add(newFlower);
-        //     nextSpawn = tic + (int)(Math.random() * 300 + 200);
-        //     //((Grass)entities.get(Ent.grass.get()).get(0)).spreadGrass();
-            
-        // }
         if (tic >= nextSpawn) {
             spreadGrass();
             if (entities.get(Ent.grass.get()).size() <= 2) {
@@ -217,11 +207,30 @@ public class Board extends JPanel implements ActionListener {
                 plantGrid[(newGrass.pos.getY() - 100) / 40][newGrass.pos.getX() / 40] = newGrass;
             }
         }
+        debugHover();
         repaint();
         tic++;
 
         CreateChildren();
         CleanUp(); 
+    }
+
+
+    private void debugHover() {
+    Point mousePoint = MouseInfo.getPointerInfo().getLocation();
+        SwingUtilities.convertPointFromScreen(mousePoint, this);
+        Position mousePos = new Position(mousePoint.x, mousePoint.y);
+        //System.out.println(mousePos);
+        entities.stream().forEach(list -> list.stream()
+                                                .filter(ent -> ent instanceof Animal)
+                                                .forEach(ent -> {
+                                                    if (ent.pos.dist(mousePos) < 40) {
+                                                        ((Animal)ent).debug = true;
+                                                    }
+                                                    else {
+                                                        ((Animal)ent).debug = false;
+                                                    }
+                                                }));
     }
     // private void printPlantGrid() {
     //     for (Plant[] arr : plantGrid) {

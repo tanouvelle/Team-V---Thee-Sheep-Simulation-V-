@@ -31,6 +31,7 @@ public abstract class Animal extends Entity{
     {
         return genes;
     }
+    public boolean debug;
 
     /*
     protected double speed = 1.0; //Tiles moved
@@ -522,7 +523,7 @@ public abstract class Animal extends Entity{
         g.setColor(colour);
         g.fillRect(pos.getX()-20, pos.getY()-20, 40,40);
 
-        if(!Board.debug) return;
+        if(!Board.debug && !this.debug) return;
         g.drawOval(pos.getX() - (int)genes.GetPerception()/2, pos.getY() - (int)genes.GetPerception()/2, (int)genes.GetPerception(), (int)genes.GetPerception());
 
 
