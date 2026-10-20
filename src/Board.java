@@ -1,6 +1,7 @@
 import java.awt.*;
 import java.awt.event.*;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -250,6 +251,7 @@ public class Board extends JPanel implements ActionListener {
     // }
 
     private void spreadGrass() {
+        Collections.shuffle(entities.get(Ent.grass.get()));
         List<Entity> newGrass = new ArrayList<>();
         List<Entity> newFlower = new ArrayList<>();
         int maxSpawn = Math.max(entities.get(Ent.sheep.get()).size(), 3);
