@@ -12,7 +12,8 @@ public abstract class Animal extends Entity{
         lookingForMate,
         chasingMate,
         fleeing,
-        resting;
+        resting,
+        roaming;
     }
 
     private static String[] nameList = {"Mary", "Franky", "Franklin", "Georgie", "Susan", "Laura", "Daisy", "Rose","Cody","Cuddles", "Bill", "Shaun", "Katie", "Brutus", "Scar", "Fido", "Jet", };
@@ -58,6 +59,7 @@ public abstract class Animal extends Entity{
 
     */
    protected int stamina = 200;
+   protected int reproduceTimer;
     protected int age = 0; // Increase by 1 every generation
     public int GetAge()
     {
@@ -99,13 +101,13 @@ public abstract class Animal extends Entity{
         
     }
 
-    public Animal(Genes genes, Animal[] parents)
+    public Animal(Genes genes, Animal[] parents, int age)
     {
 
         this.name = nameList[(int)(Math.random() * nameList.length)];
         this.genes = genes;
         this.parents = parents;
-
+        this.age = age;
         this.pos = new Position(0, 0);
 
         this.stamina = (int)(0.6 * genes.GetMaxStamina());
@@ -179,6 +181,10 @@ public abstract class Animal extends Entity{
     int wait = 0;
     public void AnimalBehaviour()
     {
+        if(reproduceTimer >= 0)
+        {
+            reproduceTimer--;
+        }
         if(!IsAlive()) return;
         hunger -= genes.GetHungerRate();
 
@@ -237,6 +243,10 @@ public abstract class Animal extends Entity{
             }case AnimalState.resting:
             {
                 Rest();
+                break;
+            }case AnimalState.roaming:
+            {
+                RoamRandomly();
                 break;
             }
 
@@ -372,7 +382,12 @@ public abstract class Animal extends Entity{
             EatFood(targetEntity);
             if(hunger >= hungerToReproduce)
             {
-                state = AnimalState.lookingForMate;
+                if(reproduceTimer <= 0 && age > genes.GetLifespan()/3)
+                {
+                    state = AnimalState.lookingForMate;
+                }else{
+                    state = AnimalState.roaming;
+                }
                 //state = AnimalState.lookingForFood;
             }else{
                 state = AnimalState.lookingForFood;
@@ -435,17 +450,26 @@ public abstract class Animal extends Entity{
     protected void RoamRandomly()
     {
         boolean moved = Move(randPos, 10, false);
-            if (moved && (wait == 0 || hunger < 0.25))
-            {   
-                wait = 100;
-                randPos = Position.genRand(Board.bWidth, Board.bHeight, 20, 120, 40);
-            }
-            else if (moved) {
-                wait--;
-            }
+        if (moved && (wait == 0 || hunger < 0.25))
+        {   
+            wait = 100;
+            randPos = Position.genRand(Board.bWidth, Board.bHeight, 20, 120, 40);
+        }
+        else if (moved) {
+            wait--;
+        }
+
+        if(reproduceTimer <= 0 && hunger >= hungerToReproduce && age >= genes.GetLifespan()/3)
+        {
+            state = AnimalState.lookingForMate;
+        }else if(hunger < 0.25)
+        {
+            state = AnimalState.lookingForFood;
+        }
     }
     protected void ChasingMate()
     {
+        
         if(hunger < hungerToReproduce)
         {
             state = AnimalState.lookingForFood;
@@ -491,7 +515,7 @@ public abstract class Animal extends Entity{
     protected void Reproduce(Animal anim)
     {
         targetEntity = null;
-        
+        reproduceTimer = genes.GetReproduceCooldown();
         //hunger = hunger - 0.4f;
         //anim.hunger = anim.hunger - 0.4f;
         anim.targetEntity = null;
@@ -536,7 +560,13 @@ public abstract class Animal extends Entity{
     @Override
     public void drawEntity(Graphics g) {
         g.setColor(colour);
-        g.fillRect(pos.getX()-20, pos.getY()-20, 40,40);
+
+        int size = 40;
+        if(age < genes.GetLifespan()/3)
+        {
+            size = 30;
+        }
+        g.fillRect(pos.getX()-20, pos.getY()-20, size,size);
 
         if(!Board.debug && !this.debug) return;
         g.drawOval(pos.getX() - (int)genes.GetPerception()/2, pos.getY() - (int)genes.GetPerception()/2, (int)genes.GetPerception(), (int)genes.GetPerception());
@@ -565,6 +595,9 @@ public abstract class Animal extends Entity{
         }
         
         g.drawString(stamina + " / " +  genes.GetMaxStamina(), xOffset, yOffset + 50);
+
+        g.setColor(Color.BLUE);
+        g.drawString(reproduceTimer + " / " +  genes.GetReproduceCooldown(), xOffset, yOffset + 60);
 
         
         if(targetEntity != null && targetEntity.IsAlive())

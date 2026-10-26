@@ -2,9 +2,9 @@ import java.util.List;
 public class Sheep extends Animal{
 
     
-    public Sheep(Genes genes, Animal[] parents)
+    public Sheep(Genes genes, Animal[] parents, int age)
     {
-        super(genes, parents);
+        super(genes, parents, age);
         entityType = Board.Ent.sheep;
 
         sprintOnFlee = true;
@@ -74,7 +74,7 @@ public class Sheep extends Animal{
         System.out.println("Making baby sheep");
         
         Genes babyGenes = new Genes(genes, partAnimal.GetGenes());
-        Sheep newSheep = new Sheep(babyGenes, new Animal[]{this, partAnimal});
+        Sheep newSheep = new Sheep(babyGenes, new Animal[]{this, partAnimal}, 0);
         Board.babyAnimals.add( newSheep);
 
 

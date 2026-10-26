@@ -88,13 +88,14 @@ public class Board extends JPanel implements ActionListener {
                 20 * (int)(Math.random()  + 8),
                 (int)(Math.random()) + 1,
                 
-                2000,
+                2500,
                 3000,
                 2,
                 20,
                 1,
                 2,
-                20
+                20,
+                300
                 
 
             );
@@ -102,31 +103,32 @@ public class Board extends JPanel implements ActionListener {
             float speed = (int)(Math.random()) + 1;
             float perception = 10 * ((int)(Math.random() * 4) + 6);
             */
-            Sheep newSheep = new Sheep(genes, new Animal[]{null, null});
+            Sheep newSheep = new Sheep(genes, new Animal[]{null, null}, (int) (Math.random()*  genes.GetLifespan()));
             entities.get(Ent.sheep.get()).add(newSheep);
         }
 
         //Spawn wolves
-        startAmount = (int)(Math.random() * 2 + 2);
+        startAmount = (int)(Math.random() * 3 + 2);
         for (int i = 0; i < startAmount; i++) {
             Genes genes = new Genes(
                 
                 15 * ((int)(Math.random()) + 6),
                 (int)(Math.random() * 1) + 1,
-                3000,
+                1500,
                 1750,
                 10,
                 20,
                 1
-                ,1.5,
-                20
+                ,1.2,
+                20,
+                1000
                 
 
             );
 
             float speed = (int)(Math.random() * 2) + 1;
             float perception = 10 * ((int)(Math.random() * 2) + 10);
-            Wolf newWolf = new Wolf(genes, new Animal[]{null, null});
+            Wolf newWolf = new Wolf(genes, new Animal[]{null, null}, (int) (Math.random()*  genes.GetLifespan()));
             entities.get(Ent.wolf.get()).add(newWolf);
         }
 
