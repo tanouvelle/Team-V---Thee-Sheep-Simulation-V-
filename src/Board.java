@@ -50,7 +50,9 @@ public class Board extends JPanel implements ActionListener {
         spawnEntities();
         entities.stream()
                   .forEach(list -> list.stream()
+                                      .parallel()
                                       .map(ent -> ent.pos = Position.genRand(bWidth, bHeight, 20, 120, 40))
+                                      .sequential()
                                       .collect(Collectors.toList())
                           );
 
@@ -240,6 +242,7 @@ public class Board extends JPanel implements ActionListener {
         Position mousePos = new Position(mousePoint.x, mousePoint.y);
         //System.out.println(mousePos);
         entities.stream().forEach(list -> list.stream()
+                                                .parallel()
                                                 .filter(ent -> ent instanceof Animal)
                                                 .forEach(ent -> {
                                                     if (ent.pos.dist(mousePos) < 40) {
