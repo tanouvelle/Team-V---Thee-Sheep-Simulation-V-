@@ -9,9 +9,9 @@ public class Wolf extends Animal {
     }
         */
 
-    public Wolf(Genes genes, Animal[] parents)
+    public Wolf(Genes genes, Animal[] parents, int age)
     {
-        super(genes, parents);
+        super(genes, parents, age);
         this.colour = Color.gray;
         entityType = Board.Ent.wolf;
 
@@ -88,7 +88,7 @@ public class Wolf extends Animal {
     {
         super.Reproduce(partAnimal);
         Genes babyGenes = new Genes(genes, partAnimal.GetGenes());
-       Board.babyAnimals.add(new Wolf(babyGenes, new Animal[]{this, partAnimal}));
+       Board.babyAnimals.add(new Wolf(babyGenes, new Animal[]{this, partAnimal}, 0));
         
     }
 /*

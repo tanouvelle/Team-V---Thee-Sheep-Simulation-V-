@@ -1,6 +1,6 @@
 public class Genes {
 
-    private static double mutationChance = 0.05;
+    private  static double mutationChance = 0.01;
     private double perception;
     private double speed;
     private int lifeSpan;
@@ -10,6 +10,8 @@ public class Genes {
     private int staminaUseRate;
     private int staminaRecoverRate;
     private double sprintMultiplier;
+
+    private int reproduceCooldown;
 
 
     private double hungerCapacity;
@@ -68,6 +70,12 @@ public class Genes {
         return stealth;
     }
 
+    public int GetReproduceCooldown()
+    {
+        return reproduceCooldown;
+    }
+
+
 
     public Genes(double perception, 
         double speed, 
@@ -77,7 +85,8 @@ public class Genes {
         int staminaUseRate,
         double hungerCapacity,
         double sprintMultiplier,
-        double stealth)
+        double stealth,
+        int reproduceCooldown)
     {
         this.perception = perception;
         this.speed = speed;
@@ -88,20 +97,21 @@ public class Genes {
         this.hungerCapacity = hungerCapacity;
         this.sprintMultiplier = sprintMultiplier;
         this.stealth = stealth;
+        this.reproduceCooldown = reproduceCooldown;
     }
 
     public Genes(Genes ParentA, Genes ParentB)
     {
-         this.perception = InheritGene(ParentA.GetPerception(), ParentB.GetPerception());
-         this.speed = InheritGene(ParentA.GetSpeed(), ParentB.GetSpeed());
-         this.lifeSpan = InheritGene(ParentA.GetLifespan(), ParentB.GetLifespan());
-         this.maxStamina = InheritGene(ParentA.GetMaxStamina(), ParentB.GetMaxStamina());
-         this.staminaUseRate = InheritGene(ParentA.GetStaminaUseRate(), ParentB.GetStaminaUseRate());
-         this.staminaRecoverRate = InheritGene(ParentA.GetStaminaRecoverRate(), ParentB.GetStaminaRecoverRate());
-         this.hungerCapacity = InheritGene(ParentA.GetHungerCapacity(), ParentB.GetHungerCapacity());
-         this.sprintMultiplier = InheritGene(ParentA.GetSprintMultiplier(), ParentB.GetSprintMultiplier());
-
-         this.stealth = InheritGene(ParentA.GetStealth(), ParentB.GetStealth());
+        this.perception = InheritGene(ParentA.GetPerception(), ParentB.GetPerception());
+        this.speed = InheritGene(ParentA.GetSpeed(), ParentB.GetSpeed());
+        this.lifeSpan = InheritGene(ParentA.GetLifespan(), ParentB.GetLifespan());
+        this.maxStamina = InheritGene(ParentA.GetMaxStamina(), ParentB.GetMaxStamina());
+        this.staminaUseRate = InheritGene(ParentA.GetStaminaUseRate(), ParentB.GetStaminaUseRate());
+        this.staminaRecoverRate = InheritGene(ParentA.GetStaminaRecoverRate(), ParentB.GetStaminaRecoverRate());
+        this.hungerCapacity = InheritGene(ParentA.GetHungerCapacity(), ParentB.GetHungerCapacity());
+        this.sprintMultiplier = InheritGene(ParentA.GetSprintMultiplier(), ParentB.GetSprintMultiplier());
+        this.reproduceCooldown = InheritGene(ParentA.GetReproduceCooldown(), ParentB.GetReproduceCooldown());
+        this.stealth = InheritGene(ParentA.GetStealth(), ParentB.GetStealth());
          
     }
     
