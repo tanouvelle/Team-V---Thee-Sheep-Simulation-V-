@@ -64,6 +64,7 @@ public class Board extends JPanel implements ActionListener {
         }
 
         tic = 1;
+        timePassed = 0;
         nextSpawn = 300;
         timer = new Timer(10, this);
         timer.start();
@@ -174,24 +175,36 @@ public class Board extends JPanel implements ActionListener {
     }
 
     Font medium = new Font("Helvetica", Font.PLAIN, 16);
+    private long timePassed;
+    private long lastTime = System.nanoTime();
     private void drawCounts(Graphics g) {
+        g.setColor(Color.white);
         g.setFont(medium);
         FontMetrics metrics = g.getFontMetrics();
-        int yPos =  ((100 - metrics.getHeight()) / 2) + metrics.getAscent();
+        int yPos =  ((100 - metrics.getHeight()) / 2) + metrics.getAscent() / 4;
 
         int nextX = bWidth / 16;
         g.drawString("Sheep: " + entities.get(Ent.sheep.get()).size(), nextX, yPos);
+
+        long seconds = timePassed / 1000;
+        String timeString = seconds / 60 + ":";
+        timeString += (seconds % 60 > 10) ? seconds % 60 : "0" + seconds % 60;
+        timeString += ".";
+        for (int i = 0; i < 2 - (int)Math.log10(timePassed % 1000); i++) {
+            timeString += "0";
+        }
+        timeString += timePassed % 1000;
+        g.drawString("Elapsed Time: " + timeString, nextX, yPos * 5 / 3);
 
         nextX += bWidth / 4;
         g.drawString("Wolves: " + entities.get(Ent.wolf.get()).size(), nextX, yPos);
 
         nextX += bWidth / 4;
         g.drawString("Flowers: " + entities.get(Ent.flower.get()).size(), nextX, yPos);
+        g.drawString("Tic: " + tic, nextX, yPos * 5 / 3);
 
         nextX += bWidth / 4;
         g.drawString("Grass: " + entities.get(Ent.grass.get()).size(), nextX, yPos);
-
-        g.drawString("Tic: " + tic, bWidth/2, 30);
     }
     private int nextSpawn = 50;
     @Override
@@ -211,6 +224,10 @@ public class Board extends JPanel implements ActionListener {
         debugHover();
         repaint();
         tic++;
+        long time = System.nanoTime();
+        long delta = (time - lastTime) / 1000000;
+        timePassed += delta;
+        lastTime = time;
 
         CreateChildren();
         CleanUp(); 
