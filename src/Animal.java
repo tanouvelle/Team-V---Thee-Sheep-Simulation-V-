@@ -311,6 +311,15 @@ public abstract class Animal extends Entity{
         newWidth = Math.clamp(newWidth, 0, Board.bWidth);
         newBufferX = Math.clamp(newBufferX, 0, Board.bWidth);
 
+        if(newWidth < 20)
+        {
+            newBufferX = 0;
+            newWidth = Board.bWidth;
+        }else if(newHeight < 20)
+        {
+            newBufferY = 100;
+            newHeight = Board.bHeight;
+        }
         System.out.println(newHeight + " / " + newBufferY);
         int end = newBufferY + newHeight;
         System.out.println(name + " Flee target bounds within " + newBufferY + " - " + end);
@@ -349,6 +358,11 @@ public abstract class Animal extends Entity{
            targetEntity = null;
             state = AnimalState.lookingForFood;
             return;
+        }
+
+        if(exhausted && giveUpChaseOnExhausted)
+        {
+            state = AnimalState.resting;
         }
 
    
@@ -512,6 +526,7 @@ public abstract class Animal extends Entity{
         targetEntity = null;
 
     }
+
 
 
     

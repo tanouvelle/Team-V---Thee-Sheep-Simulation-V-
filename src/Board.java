@@ -87,11 +87,11 @@ public class Board extends JPanel implements ActionListener {
                 (int)(Math.random()) + 1,
                 
                 2000,
-                4000,
+                3000,
                 2,
-                10,
+                20,
                 1,
-                1.5,
+                2,
                 20
                 
 
@@ -110,11 +110,11 @@ public class Board extends JPanel implements ActionListener {
             Genes genes = new Genes(
                 
                 15 * ((int)(Math.random()) + 6),
-                (int)(Math.random() * 2) + 1,
+                (int)(Math.random() * 1) + 1,
                 3000,
-                1000,
-                3,
-                40,
+                1750,
+                10,
+                20,
                 1
                 ,1.5,
                 20
