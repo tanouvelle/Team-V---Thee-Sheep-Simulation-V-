@@ -117,6 +117,7 @@ public abstract class Animal extends Entity{
             this.pos.setY(parents[0].pos.getY());
         }
             
+        this.state = AnimalState.roaming;
         this.randPos = Position.genRand(Board.bWidth, Board.bHeight, 0, 100, 40);
     }
 
@@ -459,9 +460,15 @@ public abstract class Animal extends Entity{
             wait--;
         }
 
-        if(reproduceTimer <= 0 && hunger >= hungerToReproduce && age >= genes.GetLifespan()/3)
+        if(reproduceTimer <= 0 &&  age >= genes.GetLifespan()/3)
         {
-            state = AnimalState.lookingForMate;
+            if(hunger >= hungerToReproduce)
+            {
+                state = AnimalState.lookingForMate;
+
+            }else{
+                state = AnimalState.lookingForFood;
+            }
         }else if(hunger < 0.25)
         {
             state = AnimalState.lookingForFood;
@@ -480,6 +487,7 @@ public abstract class Animal extends Entity{
         {
             targetEntity = null;
             state = AnimalState.lookingForMate;
+            return;
         }
         try{
             if(Move(targetEntity.pos, 10, false))

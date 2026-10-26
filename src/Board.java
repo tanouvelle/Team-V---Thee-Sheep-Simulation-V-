@@ -95,7 +95,7 @@ public class Board extends JPanel implements ActionListener {
                 1,
                 2,
                 20,
-                300
+                100
                 
 
             );
@@ -103,7 +103,7 @@ public class Board extends JPanel implements ActionListener {
             float speed = (int)(Math.random()) + 1;
             float perception = 10 * ((int)(Math.random() * 4) + 6);
             */
-            Sheep newSheep = new Sheep(genes, new Animal[]{null, null}, (int) (Math.random()*  genes.GetLifespan()));
+            Sheep newSheep = new Sheep(genes, new Animal[]{null, null}, (int) (Math.random()*  genes.GetLifespan()* 0.75));
             entities.get(Ent.sheep.get()).add(newSheep);
         }
 
@@ -128,7 +128,7 @@ public class Board extends JPanel implements ActionListener {
 
             float speed = (int)(Math.random() * 2) + 1;
             float perception = 10 * ((int)(Math.random() * 2) + 10);
-            Wolf newWolf = new Wolf(genes, new Animal[]{null, null}, (int) (Math.random()*  genes.GetLifespan()));
+            Wolf newWolf = new Wolf(genes, new Animal[]{null, null}, (int) (Math.random()*  genes.GetLifespan() * 0.75));
             entities.get(Ent.wolf.get()).add(newWolf);
         }
 
