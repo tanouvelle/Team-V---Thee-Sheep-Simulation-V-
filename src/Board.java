@@ -325,11 +325,13 @@ public class Board extends JPanel implements ActionListener {
         }
 
         tic++;
-        repaint();
         Thread entityThread = new Thread(() -> {
             updateEntities();
         });
         entityThread.start();
+
+        repaint();
+
         long time = System.nanoTime();
         long delta = (time - lastTime) / 1000000;
         timePassed += delta;
