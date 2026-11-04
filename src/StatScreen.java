@@ -2,7 +2,7 @@ import java.awt.*;
 import javax.swing.*;
 import java.util.*;
 import java.util.List;
-public class StatScreen extends JPanel{
+public class StatScreen extends JPanel implements Runnable{
     public int width;
     public int height;
     public JPanel statPanel;
@@ -27,13 +27,16 @@ public class StatScreen extends JPanel{
         setPreferredSize(new Dimension(width, height));
     }
 
-    public void drawStats(List<Stat> stats, float flowerColourR, float flowerColourB) {
+    public void updateStats(List<Stat> stats, float flowerColourR, float flowerColourB) {
         this.stats = stats;
         this.flowerColourR = flowerColourR;
         this.flowerColourB = flowerColourB;
-        repaint();
     }
 
+    @Override
+    public void run() {
+        repaint();
+    }
     private float flowerColourR;
     private float flowerColourB;
     @Override 

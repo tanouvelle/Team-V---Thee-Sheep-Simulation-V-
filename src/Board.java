@@ -194,10 +194,10 @@ public class Board extends JPanel implements ActionListener {
         entities.stream()
                 .forEach(list -> {
                     list.stream()
-                        .peek(ent -> ent.drawEntity(g))
-                        .filter(ent -> ent instanceof Animal)
-                        .map(ent -> (Animal)ent)
-                        .forEach(animal -> animal.AnimalBehaviour());
+                        .forEach(ent -> ent.drawEntity(g));
+                        // .filter(ent -> ent instanceof Animal)
+                        // .map(ent -> (Animal)ent)
+                        // .forEach(animal -> animal.AnimalBehaviour());
                 });
     }
 
@@ -288,13 +288,29 @@ public class Board extends JPanel implements ActionListener {
     }
 
     private void drawStats(Graphics g) {
-        statScreen.drawStats(stats, flowerKeyColourR, flowerKeyColourB);
+        statScreen.updateStats(stats, flowerKeyColourR, flowerKeyColourB);
+    }
+
+    private void updateEntities() {
+        entities.stream()
+                .forEach(list -> list.stream()
+                                    .filter(ent -> ent instanceof Animal)
+                                    .map(ent -> (Animal)ent)
+                                    .forEach(animal -> animal.AnimalBehaviour())
+                        );
     }
 
     private int nextSpawn = 50;
     @Override
     // After the timer finishes do this
     public void actionPerformed(ActionEvent e) {
+        CreateChildren();
+        CleanUp(); 
+        Thread statThread = new Thread(statScreen);
+        statThread.start();
+
+        debugHover();
+
         if (tic >= nextSpawn) {
             spreadGrass();
             if (entities.get(Ent.grass.get()).size() <= 2) {
@@ -307,23 +323,20 @@ public class Board extends JPanel implements ActionListener {
             }
         }
 
-
-        debugHover();
-
         if (tic % 100 == 0) {
             addNewStat();
         }
 
         tic++;
         repaint();
+        Thread entityThread = new Thread(() -> {
+            updateEntities();
+        });
+        entityThread.start();
         long time = System.nanoTime();
         long delta = (time - lastTime) / 1000000;
         timePassed += delta;
         lastTime = time;
-
-        
-        CreateChildren();
-        CleanUp(); 
     }
 
     private void addNewStat() {
