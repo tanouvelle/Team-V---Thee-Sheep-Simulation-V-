@@ -195,9 +195,6 @@ public class Board extends JPanel implements ActionListener {
                 .forEach(list -> {
                     list.stream()
                         .forEach(ent -> ent.drawEntity(g));
-                        // .filter(ent -> ent instanceof Animal)
-                        // .map(ent -> (Animal)ent)
-                        // .forEach(animal -> animal.AnimalBehaviour());
                 });
     }
 
